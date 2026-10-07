@@ -32,3 +32,11 @@ Content-Type: {{contentType}}
   "price": 2100.50
 }
 
+### POST request
+POST {{baseUrl}}/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Microfono para grabar",
+  "price": 12.99
+}
