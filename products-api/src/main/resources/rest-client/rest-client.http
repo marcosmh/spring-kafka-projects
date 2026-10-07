@@ -13,3 +13,22 @@ Content-Type: {{contentType}}
   "name": "Monitor",
   "price": 3000.00
 }
+
+### POST request
+POST {{baseUrl}}/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Mouse RGB MySQL",
+  "price": 11.50
+}
+
+### POST request
+POST {{baseUrl}}/products
+Content-Type: {{contentType}}
+
+{
+  "name": "lampara de escritorio",
+  "price": 2100.50
+}
+
