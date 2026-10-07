@@ -1,0 +1,15 @@
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### GET request with a header
+GET {{baseUrl}}/ping
+Accept: {{contentType}}
+
+### POST request
+POST {{baseUrl}}/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Monitor",
+  "price": 3000.00
+}
