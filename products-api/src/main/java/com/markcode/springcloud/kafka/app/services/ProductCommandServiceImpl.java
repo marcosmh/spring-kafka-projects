@@ -8,12 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.integration.support.MessageBuilder;
-import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -34,6 +32,34 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     public Reply<?> sendCreateAndWait(ProductDTO dto, Duration timeout) {
 
         Command<ProductDTO> cmd = new Command<>("CREATE",null,dto);
+        return sendAndWait(cmd, timeout);
+    }
+
+    @Override
+    public Reply<?> sendReadAndWait(Long id, Duration timeout) {
+        Command<ProductDTO> cmd = new Command<>("READ",id,null);
+        return sendAndWait(cmd, timeout);
+    }
+
+    @Override
+    public Reply<?> sendReadAllAndWait(Duration timeout) {
+        Command<ProductDTO> cmd = new Command<>("READ_ALL",null,null);
+        return sendAndWait(null, timeout);
+    }
+
+    @Override
+    public Reply<?> sendUpdateAndWait(ProductDTO dto, Long id, Duration timeout) {
+        Command<ProductDTO> cmd = new Command<>("UPDATE",id,dto);
+        return sendAndWait(cmd, timeout);
+    }
+
+    @Override
+    public Reply<?> sendDeleteAndWait(Long id, Duration timeout) {
+        Command<ProductDTO> cmd = new Command<>("DELETE",id,null);
+        return sendAndWait(cmd, timeout);
+    }
+
+    private Reply<?> sendAndWait(Command<?> cmd, Duration timeout) {
         String correlationId = UUID.randomUUID().toString();
         logger.info("Api Products Client Creating product with correlationId {}",  correlationId);
 
@@ -54,5 +80,9 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             throw new RuntimeException("Timeout esperando respuesta de products-commands desde Kafka",e);
         }
     }
+
+
+
+    
 
 }

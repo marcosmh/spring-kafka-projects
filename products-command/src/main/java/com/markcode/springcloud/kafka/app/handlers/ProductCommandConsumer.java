@@ -1,6 +1,7 @@
 package com.markcode.springcloud.kafka.app.handlers;
 
 
+import com.markcode.springcloud.kafka.app.entities.Product;
 import com.markcode.springcloud.kafka.app.models.Command;
 import com.markcode.springcloud.kafka.app.models.Reply;
 import com.markcode.springcloud.kafka.app.models.dto.ProductDTO;
@@ -34,7 +35,7 @@ public class ProductCommandConsumer {
         return msg -> {
             Command<ProductDTO> cmd = msg.getPayload();
             String type = cmd.type() == null ? "" : cmd.type().toUpperCase();
-            Reply<ProductDTO> reply = null;
+            Reply<?> reply = null;
 
             switch (type) {
                 case "CREATE" -> {
@@ -48,14 +49,49 @@ public class ProductCommandConsumer {
                     log.info("Creating product:  name={}, price={}", productSave.name(), productSave.price());
                     reply = new Reply<>("SUCCESS", "Create product: ", productSave);
                 }
-                case "UPDATE" -> {
-                    log.info("Creating product:  name=, price=");
-                }
-                case "DELETE" -> {
-                    log.info("Creating product:  name=, price=");
+                case "READ" -> {
+                    if(cmd.id() == null) {
+                        log.warn("Id is required");
+                        reply = new Reply<>("ERROR", "Id is required ", null);
+                    }
+
+                    ProductDTO dto = productService.findById(cmd.id());
+                    reply = (dto == null) ?
+                            new Reply<>("ERROR", "Product not found. ", null) :
+                            new Reply<>("SUCCESS", "Read producto name: ", dto);
+
+                    log.info("Reading product by id");
                 }
                 case "READ_ALL" -> {
-                    log.info("Creating product:  name=, price=");
+                    reply = new Reply<>("SUCCESS", "Read all products ", productService.findAll());
+                    log.info("Reading all prodcuts");
+                }
+                case "UPDATE" -> {
+                    if(cmd.body() == null && cmd.id() == null) {
+                        log.warn("Id and body is required");
+                        reply = new Reply<>("ERROR", "Id and body is required", null);
+                    }
+
+                    ProductDTO dto = productService.findById(cmd.id());
+                    if(dto != null) {
+                        reply = new Reply<>("SUCCESS", "Update product name: ", dto);
+                        log.info("Creating product:  name={}, price={}", dto.name(), dto.price());
+                    } else {
+                        reply = new Reply<>("ERROR", "Product not found ", null);
+                        log.warn("Product not found");
+                    }
+
+                }
+                case "DELETE" -> {
+                    if(cmd.id() == null) {
+                        log.warn("Id is required");
+                        reply = new Reply<>("ERROR", "Id is required ", null);
+                    }
+                    boolean result = productService.delete(cmd.id());
+                    reply = (result) ?
+                            new Reply<>("SUCCESS", "Update product name: ", "Delete") :
+                            new Reply<>("ERROR", "Product not found ", null);
+                    log.info("Deleting product");
                 }
                 default -> {
                     log.warn("Unknown command type={}", type);
