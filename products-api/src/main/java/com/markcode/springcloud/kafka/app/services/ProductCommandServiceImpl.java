@@ -37,9 +37,9 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         String correlationId = UUID.randomUUID().toString();
         logger.info("Api Products Client Creating product with correlationId {}",  correlationId);
 
-        CompletableFuture<Reply<?>> future = replyInbox.register(correlationId);
+        var future = replyInbox.register(correlationId);
 
-        Message<Command<ProductDTO>> msg = MessageBuilder.withPayload(cmd)
+        var msg = MessageBuilder.withPayload(cmd)
                 .setHeader("correlationId", correlationId).build();
 
         boolean send = this.bridge.send("commands-out-0", msg);
