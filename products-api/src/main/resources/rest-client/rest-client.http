@@ -49,3 +49,34 @@ Content-Type: {{contentType}}
   "name": "Regulador de energiaXX44",
   "price": 16.66
 }
+
+### GET request
+GET {{baseUrl}}/products
+Content-Type: {{contentType}}
+
+
+### POST request
+POST {{baseUrl}}/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Bocinas",
+  "price": 89.98
+}
+
+### GET request
+GET {{baseUrl}}/products/20
+Content-Type: {{contentType}}
+
+### DELETE request
+DELETE {{baseUrl}}/products/52
+Content-Type: {{contentType}}
+
+### PUT request
+PUT {{baseUrl}}/products/7
+Content-Type: {{contentType}}
+
+{
+  "name": "Regulador de energia recargable",
+  "price": 16.61
+}

@@ -40,7 +40,7 @@ public class ProductController {
         return getResponseEntity(commandService.sendReadAllAndWait(Duration.ofSeconds(5)));
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody ProductDTO dto) {
         return getResponseEntity(commandService.sendUpdateAndWait(dto, id, Duration.ofSeconds(5)));
     }
