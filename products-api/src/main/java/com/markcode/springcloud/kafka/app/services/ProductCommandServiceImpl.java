@@ -2,6 +2,7 @@ package com.markcode.springcloud.kafka.app.services;
 
 import com.markcode.springcloud.kafka.app.messaging.ReplyInbox;
 import com.markcode.springcloud.kafka.app.models.Command;
+import com.markcode.springcloud.kafka.app.models.CommandType;
 import com.markcode.springcloud.kafka.app.models.Reply;
 import com.markcode.springcloud.kafka.app.models.dto.ProductDTO;
 import org.slf4j.Logger;
@@ -30,33 +31,27 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     @Override
     public Reply<?> sendCreateAndWait(ProductDTO dto, Duration timeout) {
-
-        Command<ProductDTO> cmd = new Command<>("CREATE",null,dto);
-        return sendAndWait(cmd, timeout);
+        return sendAndWait(new Command<>(CommandType.CREATE,null,dto), timeout);
     }
 
     @Override
     public Reply<?> sendReadAndWait(Long id, Duration timeout) {
-        Command<ProductDTO> cmd = new Command<>("READ",id,null);
-        return sendAndWait(cmd, timeout);
+        return sendAndWait(new Command<>(CommandType.READ,id,null), timeout);
     }
 
     @Override
     public Reply<?> sendReadAllAndWait(Duration timeout) {
-        Command<ProductDTO> cmd = new Command<>("READ_ALL",null,null);
-        return sendAndWait(null, timeout);
+        return sendAndWait(new Command<>(CommandType.READ_ALL,null,null), timeout);
     }
 
     @Override
     public Reply<?> sendUpdateAndWait(ProductDTO dto, Long id, Duration timeout) {
-        Command<ProductDTO> cmd = new Command<>("UPDATE",id,dto);
-        return sendAndWait(cmd, timeout);
+        return sendAndWait(new Command<>(CommandType.UPDATE,id,dto), timeout);
     }
 
     @Override
     public Reply<?> sendDeleteAndWait(Long id, Duration timeout) {
-        Command<ProductDTO> cmd = new Command<>("DELETE",id,null);
-        return sendAndWait(cmd, timeout);
+        return sendAndWait(new Command<>(CommandType.DELETE,id,null), timeout);
     }
 
     private Reply<?> sendAndWait(Command<?> cmd, Duration timeout) {

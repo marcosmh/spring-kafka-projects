@@ -3,6 +3,7 @@ package com.markcode.springcloud.kafka.app.handlers;
 
 import com.markcode.springcloud.kafka.app.entities.Product;
 import com.markcode.springcloud.kafka.app.models.Command;
+import com.markcode.springcloud.kafka.app.models.CommandType;
 import com.markcode.springcloud.kafka.app.models.Reply;
 import com.markcode.springcloud.kafka.app.models.dto.ProductDTO;
 import com.markcode.springcloud.kafka.app.services.ProductService;
@@ -34,11 +35,12 @@ public class ProductCommandConsumer {
     public Function<Message<Command<ProductDTO>>, Message<Reply<?>> > handleCommands() {
         return msg -> {
             Command<ProductDTO> cmd = msg.getPayload();
-            String type = cmd.type() == null ? "" : cmd.type().toUpperCase();
+            //String type = cmd.type() == null ? "" : cmd.type().toUpperCase();
             Reply<?> reply = null;
 
-            switch (type) {
-                case "CREATE" -> {
+
+            switch (cmd.type()) {
+                case  CommandType.CREATE -> {
                     if(cmd.body() == null) {
                         log.warn("Create empty body");
                         reply = new Reply<>("ERROR", "Create Empty Body", null);
@@ -49,7 +51,7 @@ public class ProductCommandConsumer {
                     log.info("Creating product:  name={}, price={}", productSave.name(), productSave.price());
                     reply = new Reply<>("SUCCESS", "Create product: ", productSave);
                 }
-                case "READ" -> {
+                case CommandType.READ -> {
                     if(cmd.id() == null) {
                         log.warn("Id is required");
                         reply = new Reply<>("ERROR", "Id is required ", null);
@@ -62,11 +64,11 @@ public class ProductCommandConsumer {
 
                     log.info("Reading product by id");
                 }
-                case "READ_ALL" -> {
+                case CommandType.READ_ALL -> {
                     reply = new Reply<>("SUCCESS", "Read all products ", productService.findAll());
                     log.info("Reading all prodcuts");
                 }
-                case "UPDATE" -> {
+                case CommandType.UPDATE -> {
                     if(cmd.body() == null && cmd.id() == null) {
                         log.warn("Id and body is required");
                         reply = new Reply<>("ERROR", "Id and body is required", null);
@@ -82,7 +84,7 @@ public class ProductCommandConsumer {
                     }
 
                 }
-                case "DELETE" -> {
+                case CommandType.DELETE -> {
                     if(cmd.id() == null) {
                         log.warn("Id is required");
                         reply = new Reply<>("ERROR", "Id is required ", null);
@@ -94,7 +96,7 @@ public class ProductCommandConsumer {
                     log.info("Deleting product");
                 }
                 default -> {
-                    log.warn("Unknown command type={}", type);
+                    log.warn("Unknown command type={}", cmd.type());
                     reply = new Reply<>("ERROR","Unknown command type", null);
                 }
             }
