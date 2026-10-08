@@ -31,81 +31,90 @@ public class ProductCommandConsumer {
     }
 
     @Bean
-    public Function<Message<Command<ProductDTO>>, Message<Reply<?>> > handleCommands() {
+    public Function<Message<Command<ProductDTO>>, Message<Reply<Object>> > handleCommands() {
         return msg -> {
+
+            String correlationId = msg.getHeaders().get("correlationId",String.class);
+            log.info("Recibiendo correlationId={}", correlationId);
+            if(correlationId == null || correlationId.isBlank()) {
+                return  MessageBuilder
+                        .withPayload(new Reply<>(ReplyStatus.ERROR, "Missing correlationId",null))
+                        .build();
+            }
+
             Command<ProductDTO> cmd = msg.getPayload();
-            Reply<?> reply = null;
-
-
+            Reply<Object> reply =
             switch (cmd.type()) {
                 case  CommandType.CREATE -> {
                     if(cmd.body() == null) {
                         log.warn("Create empty body");
-                        reply = new Reply<>(ReplyStatus.ERROR, "Create Empty Body", null);
+                        yield new Reply<>(ReplyStatus.ERROR, "Create Empty Body", null);
                     }
 
                     ProductDTO productSave =productService.create(cmd.body());
 
                     log.info("Creating product:  name={}, price={}", productSave.name(), productSave.price());
-                    reply = new Reply<>(ReplyStatus.SUCCESS , "Create product: ", productSave);
+                    yield new Reply<>(ReplyStatus.SUCCESS , "Create product: ", productSave);
                 }
                 case CommandType.READ -> {
                     if(cmd.id() == null) {
                         log.warn("Id is required");
-                        reply = new Reply<>(ReplyStatus.ERROR, "Id is required ", null);
+                        yield new Reply<>(ReplyStatus.ERROR, "Id is required ", null);
                     }
 
                     ProductDTO dto = productService.findById(cmd.id());
-                    reply = (dto == null) ?
+
+                    log.info("Reading product by id");
+                    yield (dto == null) ?
                             new Reply<>(ReplyStatus.ERROR, "Product not found. ", null) :
                             new Reply<>(ReplyStatus.SUCCESS, "Read producto name: ", dto);
 
-                    log.info("Reading product by id");
+
                 }
                 case CommandType.READ_ALL -> {
-                    reply = new Reply<>(ReplyStatus.SUCCESS, "Read all products ", productService.findAll());
                     log.info("Reading all prodcuts");
+                    yield new Reply<>(ReplyStatus.SUCCESS, "Read all products ", productService.findAll());
+
                 }
                 case CommandType.UPDATE -> {
                     if(cmd.body() == null && cmd.id() == null) {
                         log.warn("Id and body is required");
-                        reply = new Reply<>(ReplyStatus.ERROR, "Id and body is required", null);
+                        yield new Reply<>(ReplyStatus.ERROR, "Id and body is required", null);
                     }
 
                     ProductDTO dto = productService.findById(cmd.id());
                     if(dto != null) {
-                        reply = new Reply<>(ReplyStatus.SUCCESS, "Update product name: ", dto);
                         log.info("Creating product:  name={}, price={}", dto.name(), dto.price());
+                        yield new Reply<>(ReplyStatus.SUCCESS, "Update product name: ", dto);
+
                     } else {
-                        reply = new Reply<>(ReplyStatus.ERROR, "Product not found ", null);
                         log.warn("Product not found");
+                        yield new Reply<>(ReplyStatus.ERROR, "Product not found ", null);
                     }
 
                 }
                 case CommandType.DELETE -> {
                     if(cmd.id() == null) {
                         log.warn("Id is required");
-                        reply = new Reply<>(ReplyStatus.ERROR, "Id is required ", null);
+                        yield new Reply<>(ReplyStatus.ERROR, "Id is required ", null);
                     }
                     boolean result = productService.delete(cmd.id());
-                    reply = (result) ?
+                    log.info("Deleting product");
+                    yield (result) ?
                             new Reply<>(ReplyStatus.SUCCESS, "Update product name: ", "Delete") :
                             new Reply<>(ReplyStatus.ERROR, "Product not found ", null);
-                    log.info("Deleting product");
+
                 }
                 default -> {
                     log.warn("Unknown command type={}", cmd.type());
-                    reply = new Reply<>(ReplyStatus.ERROR,"Unknown command type", null);
+                    yield new Reply<>(ReplyStatus.ERROR,"Unknown command type", null);
                 }
-            }
+            };
 
-            String correlationId = msg.getHeaders().get("correlationId",String.class);
-            log.info("Recibiendo correlationId={}", correlationId);
-            MessageBuilder<Reply<?>> out = MessageBuilder.withPayload(reply);
-            if(correlationId != null) {
-                out.setHeader("correlationId",correlationId);
-            }
-            return out.build();
+            return MessageBuilder.withPayload(reply)
+                    .setHeader("correlationId", correlationId)
+                    .build();
+
         };
     }
 }
