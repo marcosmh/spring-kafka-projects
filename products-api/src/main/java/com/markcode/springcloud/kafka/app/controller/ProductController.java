@@ -1,5 +1,6 @@
 package com.markcode.springcloud.kafka.app.controller;
 
+import com.markcode.springcloud.kafka.app.models.Reply;
 import com.markcode.springcloud.kafka.app.models.dto.ProductDTO;
 import com.markcode.springcloud.kafka.app.services.ProductCommandService;
 
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
 import java.util.Map;
 
 @RestController
@@ -25,8 +27,11 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody ProductDTO dto) {
-        commandService.sendCreate(dto);
-        return ResponseEntity.ok().body(Map.of("message","Succes Sent"));
+        Reply<?> reply = commandService.sendCreateAndWait(dto, Duration.ofSeconds(5));
+        if("SUCCESS".equalsIgnoreCase(reply.status())) {
+            return ResponseEntity.ok(reply.body());
+        }
+        return ResponseEntity.badRequest().body(Map.of("error",reply.message()));
     }
 
 

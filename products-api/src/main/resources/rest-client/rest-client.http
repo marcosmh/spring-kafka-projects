@@ -40,3 +40,12 @@ Content-Type: {{contentType}}
   "name": "Microfono para grabar",
   "price": 12.99
 }
+
+### POST request
+POST {{baseUrl}}/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Regulador de energiaXX44",
+  "price": 16.66
+}
