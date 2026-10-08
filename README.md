@@ -42,6 +42,7 @@ EOF
 * docker start mysql
 * docker logs -f mysql
 * docker logs -f kafka
+* docker rmi ´images´
 
 ## Create a Kafka container
 * sudo docker run -d --name kafka -p 9092:9092 apache/kafka:4.2.0
@@ -159,3 +160,22 @@ provectuslabs/kafka-ui:latest
 6) Open in browser, go to: 
 * http://localhost:8085
 
+
+## create images
+* products-api
+./mvnw clean -DskipTests package
+sudo docker build -t products-api:latest .
+
+* products-command
+./mvnw clean -DskipTests package
+sudo docker build -t products-command:latest .
+
+## create network 
+* sudo docker network connect kafka-net mysql
+
+## Up microservices
+* sudo docker run -d --name products-command --network kafka-net \
+-p 8081:8081 products-command:latest
+
+* sudo docker run -d --name products-api --network kafka-net \
+-p 8080:8080 products-api:latest
