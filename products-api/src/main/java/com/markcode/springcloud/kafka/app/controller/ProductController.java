@@ -1,6 +1,7 @@
 package com.markcode.springcloud.kafka.app.controller;
 
 import com.markcode.springcloud.kafka.app.models.Reply;
+import com.markcode.springcloud.kafka.app.models.ReplyStatus;
 import com.markcode.springcloud.kafka.app.models.dto.ProductDTO;
 import com.markcode.springcloud.kafka.app.services.ProductCommandService;
 
@@ -50,7 +51,7 @@ public class ProductController {
     }
 
     private static @NonNull ResponseEntity<?> getResponseEntity(Reply<?> reply) {
-        if("SUCCESS".equalsIgnoreCase(reply.status())) {
+        if(reply.status().isSuccess()) {
             return ResponseEntity.ok(reply.body());
         }
         return ResponseEntity.badRequest().body(Map.of("error", reply.message()));
