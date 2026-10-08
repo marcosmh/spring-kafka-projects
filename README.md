@@ -1,6 +1,13 @@
 # spring-kafka-projects
 Projects with Spring Boot and Kafka
 
+## Development Environment
+- OS: Debian GNU/Linux 13 (trixie) x86_64
+- Host: Windows Subsystem for Linux - Debian (2.7.14.0)
+- Kernel: Linux 6.18.33.2-microsoft-standard-WSL2
+- CPU: AMD Ryzen 7 250 (16) @ 3.29 GHz
+- Memory: 2.41 GiB / 7.41 GiB (33%)
+
 ## Install Docker on WSL Debian 13
 * sudo apt update
 * sudo apt upgrade -y
